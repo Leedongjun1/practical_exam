@@ -1,15 +1,15 @@
 package com.practical.exam.cms.examination.service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.practical.exam.cms.examination.dao.ExaminationDao;
@@ -27,19 +27,84 @@ public class ExaminationService {
 	public List<Map<String, Object>> getExamination() {
 		// 과목별 출제될 문제 갯수
 		List<Map<String, String>> examCntList = examinationDao.getExaminationCnt();
-		// 사용자의 회차 조회 ( 갯수 + 1)
-		int testNum = examinationDao.getUserTestCnt(userInfo.getUserId());
+		System.out.println("한번 볼까나 ? " + examCntList.toString());
+		
+		List<Integer> CountList = examCntList.stream().map(map -> {
+			Object qCntObj = map.get("q_cnt");
+	        if (qCntObj instanceof String) {
+	            return Integer.parseInt((String) qCntObj);  // String을 Integer로 변환
+	        } else if (qCntObj instanceof Integer) {
+	            return (Integer) qCntObj;  // 이미 Integer라면 캐스팅
+	        } else {
+	            throw new IllegalArgumentException("Unsupported type for q_cnt: " + qCntObj.getClass().getName());
+	        }
+			
+		}).toList();
+		int totalCount = CountList.stream()
+	            .reduce(0, Integer::sum);
+		
+		if(totalCount > 20) {
+			int fixCount = totalCount - 20;
+			for(int i = fixCount; i > 0; i-- ) {
+				Random random = new Random();
 
+		        List<Integer> targetType = examCntList.stream()
+		            .filter(map -> {
+		                Object qCntObj = map.get("q_cnt");
+		                if (qCntObj instanceof String) {
+		                    return Integer.parseInt((String) qCntObj) > 0;
+		                } else if (qCntObj instanceof Integer) {
+		                    return (Integer) qCntObj > 0;
+		                } else {
+		                    throw new IllegalArgumentException("Unsupported type for q_cnt: " + qCntObj.getClass().getName());
+		                }
+		            })
+		            .map(map -> {
+		                Object qTypeObj = map.get("q_type");
+		                if (qTypeObj instanceof String) {
+		                    return Integer.parseInt((String) qTypeObj);
+		                } else if (qTypeObj instanceof Integer) {
+		                    return (Integer) qTypeObj;
+		                } else {
+		                    throw new IllegalArgumentException("Unsupported type for q_type: " + qTypeObj.getClass().getName());
+		                }
+		            })
+		            .toList();
+
+		        int randType = targetType.get(random.nextInt(targetType.size()));
+		        System.out.println("당첨? " + randType);
+		        examCntList.stream()
+		            .filter(map -> {
+		                Object qTypeObj = map.get("q_type");
+		                return String.valueOf(randType).equals(qTypeObj.toString());
+		            })
+		            .forEach(map -> {
+		            	int qCntValue = classCast(map.get("q_cnt"));
+		                String finalCnt = String.valueOf(Integer.toString(qCntValue - 1));
+		                map.put("q_cnt", finalCnt);
+		            });
+			}
+		}
+		
+		System.out.println("바뀐거 볼까나 ? " + examCntList.toString());
+		
+		// 사용자의 회차 조회 ( 갯수 + 1)
+		int testNum = examinationDao.getUserTestCnt(userInfo.getUserNo());
+		
 		// 랜덤 문제 20개 생성을 위한 params 기입
 		HashMap<String, Object> params = new HashMap<String, Object>();
 
 		params.put("testNum", testNum);
-		params.put("userId", userInfo.getUserId());
+		params.put("userNo", userInfo.getUserNo());
 
 		// 신규 문제 생성
 		for (Map<String, String> data : examCntList) {
+			System.out.println("뭐나오길래" + data.toString());
+            int qCntValue = classCast(data.get("q_cnt"));
+            
 			params.put("q_type", data.get("q_type"));
-			params.put("q_cnt", data.get("q_cnt"));
+			params.put("q_cnt", qCntValue);
+			System.out.println("이걸봤어야하네" + params.toString());
 			examinationDao.setRandomExamination(params);
 		}
 
@@ -75,24 +140,39 @@ public class ExaminationService {
 				}
 			}
 		}
-
+		System.out.println("최종 문제목록1"+result.toString());
+		// q_no 기준으로 오름차순 정렬
+		result.sort(Comparator.comparing(map -> (Integer) map.get("qNo")));
+		System.out.println("최종 문제목록2"+result.toString());
 		return result;
+	}
+	
+	private int classCast(Object qCntObj) {
+		int qCntValue;
+        if (qCntObj instanceof String) {
+            qCntValue = Integer.parseInt((String) qCntObj);
+        } else if (qCntObj instanceof Integer) {
+            qCntValue = (Integer) qCntObj;
+        } else {
+            throw new IllegalArgumentException("Unsupported type for q_cnt: " + qCntObj.getClass().getName());
+        }
+		return qCntValue;
 	}
 
 		
 	public HashMap<String,Object> marking(HashMap<String,Object> reqData) {
-	
+		System.out.println("뭐가 오긴오나? " + reqData.toString());
 		// 유저가 입력한 답 DB에 입력
 		int testNum = Integer.parseInt((String)reqData.get("testNum"));
 		
 		// 유저가 입력한 정답
 		List<HashMap<String,Object>> markData = (List<HashMap<String,Object>>)reqData.get("markData");
-		reqData.put("userId", userInfo.getUserId());
+		reqData.put("userNo", userInfo.getUserNo());
 		// 실제 정답
 		List<Map<String,Object>> correctAnswer = examinationDao.correctAnswer(reqData);
 		
 		HashMap<String,Object> updateData = new HashMap<String,Object>();
-		updateData.put("userId", userInfo.getUserId());
+		updateData.put("userNo", userInfo.getUserNo());
 		updateData.put("testNum",testNum );
 		
 		for (int i = 0; i < 20; i++) {

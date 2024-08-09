@@ -25,14 +25,14 @@ public class HomeService {
 	private UserInfo userInfo;
 	
 	public HashMap<String, Object> dash() {
-		String userId = userInfo.getUserId();
+		String userNo = userInfo.getUserNo();
 		
 		HashMap<String, Object> homeInfo = new HashMap<>();
 		homeInfo.put("userName", userInfo.getUserNm());
 		
-		homeInfo.put("passPercent", homeDao.passPercent(userId));
+		homeInfo.put("passPercent", homeDao.passPercent(userNo) == null ? 0 : homeDao.passPercent(userNo));
 		
-		List<Map<String, Object>> barChart = homeDao.barChart(userId);
+		List<Map<String, Object>> barChart = homeDao.barChart(userNo);
 		HashMap<String, List<String>> charts = new HashMap<String, List<String>>();
 		List<String> score = new ArrayList<String>();
 		List<String> testNum = new ArrayList<String>();

@@ -35,6 +35,7 @@ public class LoginService {
 	 */
 	
 	public ResponseEntity<Object> login(HashMap<String,String> reqData) {
+		System.out.println("어떻게 담겨오나" + reqData.toString());
 		Map<String,String> reslt = loginDao.getUserInfo(reqData);
 		
 		
@@ -45,6 +46,7 @@ public class LoginService {
 			
 			
 			// 세션 생성
+			userInfo.setUserNo(reslt.get("userNo"));
 			userInfo.setUserId(reslt.get("userId"));
 			userInfo.setUserNm(reslt.get("userNm"));
 
@@ -72,10 +74,10 @@ public class LoginService {
 		
 		if(!loginDao.idDuplicated(reqData)) {
 			
-			if(!loginDao.authNumberValid(reqData)) {
-				result = "인증번호가 옳바르지 않거나, 인증번호 세션이 만료되었습니다. ";
-				return new ResponseEntity<>(result,HttpStatus.UNPROCESSABLE_ENTITY);
-			}
+//			if(!loginDao.authNumberValid(reqData)) {
+//				result = "인증번호가 옳바르지 않거나, 인증번호 세션이 만료되었습니다. ";
+//				return new ResponseEntity<>(result,HttpStatus.UNPROCESSABLE_ENTITY);
+//			}
 			
 			loginDao.addUserInfo(reqData);
 			result = "회원가입 성공하셨습니다 !";

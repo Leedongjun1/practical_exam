@@ -306,9 +306,10 @@
 			return false;
 		} else if (!checkName(document.getElementById('userName'))) {
 			return false;
-		} else if (!inNum(document.getElementById('checkNum'))) {
-			return false;
 		}
+//		else if (!inNum(document.getElementById('checkNum'))) {
+//			return false;
+//		}
 
 		return true;
 	}
@@ -368,7 +369,7 @@
 					"password" : document.getElementById('password').value,
 					"userName" : document.getElementById('userName').value,
 					"phoneNum" : document.getElementById('phoneNum').value,
-					"authNumber": document.getElementById('checkNum').value
+					//"authNumber": document.getElementById('checkNum').value
 				}
 				
 				callPostData('/signUp', jsonStr, signUpCallback);

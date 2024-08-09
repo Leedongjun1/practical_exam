@@ -15,11 +15,19 @@ import org.springframework.web.context.WebApplicationContext;
 @Component
 @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class UserInfo {
+	private String userNo;
 	private String userId;
 	private String userNm;
 	private String auth;
 	private List<String> menu;
 	
+	
+	public String getUserNo() {
+		return userNo;
+	}
+	public void setUserNo(String userNo) {
+		this.userNo = userNo;
+	}
 	public String getUserId() {
 		return userId;
 	}

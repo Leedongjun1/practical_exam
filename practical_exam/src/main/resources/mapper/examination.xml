@@ -27,16 +27,16 @@
 		SELECT IFNULL(MAX(TEST_NUMBER),0)+1 AS CNT
 		FROM
 		P_QUESTION_TEST_HST
-		WHERE USER_ID = #{userId}
+		WHERE USER_NO = #{userNo}
 	</select>
 
 	<!-- 문제 생성 -->
 	<insert id="setRandomExamination">
 		INSERT INTO P_QUESTION_TEST_HST
-		(USER_ID, TEST_NUMBER,
+		(USER_NO, TEST_NUMBER,
 		QUESTION_NO, QUESTION_SEQ, TEST_DATE)
 		(
-		SELECT #{userId} ,#{testNum} , 0
+		SELECT #{userNo} ,#{testNum} , 0
 		,SEQ , NOW()
 		FROM P_QUESTION_INFO PQI
 		WHERE QUESTION_TYPE = #{q_type}
@@ -53,11 +53,11 @@
 		OVER(ORDER BY RAND()) R_NUM
 		, P.TEST_NUMBER
 		, P.QUESTION_SEQ
-		, P.USER_ID
+		, P.USER_NO
 		FROM P_QUESTION_TEST_HST P
 		WHERE P.TEST_NUMBER = #{testNum}
 		AND
-		P.USER_ID = #{userId}
+		P.USER_NO = #{userNo}
 		) AS K
 		SET QUESTION_NO = K.R_NUM
 		WHERE
@@ -86,11 +86,11 @@
 			 , INFO.QUESTION_TYPE
 			 , INFO.QUESTION_ANSWER_TYPE
 			 , CASE WHEN INFO.QUESTION_CONTENT = 'Image'
-			  	 	THEN CONCAT(CONCAT('/practice_img/',CONCAT(INFO.QUESTION_KIND,CONCAT('/',INFO.QUESTION_NO))),'.PNG')
+			  	 	THEN CONCAT('/practice_img/', INFO.EXAM_YEAR, '_', INFO.EXAM_CYCLE, '/', INFO.QUESTION_NO, '.PNG')
 		  	   ELSE NULL END AS IMAGE_URL
 		FROM P_QUESTION_TEST_HST HST, P_QUESTION_INFO INFO
 		WHERE HST.QUESTION_SEQ = INFO.SEQ
-		AND USER_ID = #{userId}
+		AND USER_NO = #{userNo}
 		AND TEST_NUMBER = #{testNum}
 		ORDER BY HST.QUESTION_NO
 	</select>
@@ -106,7 +106,7 @@
 			 , INFO.QUESTION_ANSWER 
 			 , INFO.QUESTION_ANSWER_TYPE  
 		FROM P_QUESTION_TEST_HST HST , P_QUESTION_INFO INFO 
-		WHERE USER_ID = #{userId}
+		WHERE USER_NO = #{userNo}
 		AND TEST_NUMBER= #{testNum}
 		AND HST.QUESTION_SEQ =INFO.SEQ 
 		ORDER BY QUESTION_NO ASC
@@ -117,14 +117,14 @@
 			ANSWER_YN = #{answerYn} , 
 			USER_ANSWER = #{userAnswer}
 		WHERE TEST_NUMBER = #{testNum} 
-		AND USER_ID = #{userId}
+		AND USER_NO = #{userNo}
 		AND QUESTION_NO = #{qNo}
 	</update>
 	
 	<select id="getMarkingScore" parameterType="Map" resultType="int">
 		SELECT COUNT(1) * 5
 		FROM P_QUESTION_TEST_HST
-		WHERE USER_ID = #{userId}
+		WHERE USER_NO = #{userNo}
 		AND TEST_NUMBER= #{testNum}
 		AND ANSWER_YN ='Y'
 	</select>

@@ -4,12 +4,12 @@
         
 <mapper namespace="com.practical.exam.cms.home.dao.HomeDao">
 	
-	<select id="passPercent" parameterType="String" resultType="int">
+	<select id="passPercent" parameterType="String" resultType="Integer">
 		SELECT ROUND(SUM(CASE WHEN SCORE>=60 THEN 1 ELSE 0 END)/ COUNT(1),2) * 100 AS PASS_PERCENT
 		FROM (
     		SELECT SUM(CASE WHEN ANSWER_YN='Y' THEN 5 ELSE 0 END) AS SCORE
     		FROM P_QUESTION_TEST_HST PQTH 
-    		WHERE USER_ID = #{userId}
+    		WHERE USER_NO = #{userNo}
     		GROUP BY TEST_NUMBER
 		) A
 	</select>
@@ -24,7 +24,7 @@
 		from (SELECT TEST_NUMBER
 				, SUM(CASE WHEN ANSWER_YN='Y' THEN 5 ELSE 0 END) AS SCORE
 			FROM P_QUESTION_TEST_HST PQTH 
-			WHERE USER_ID = #{userId}
+			WHERE USER_NO = #{userNo}
 			GROUP BY TEST_NUMBER
 			order by test_number desc
 			limit 5) as a 

@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface HomeDao {
 	
-	int passPercent(String userId);
+	Integer passPercent(String userId);
 	
 	List<Map<String, Object>> barChart(String userId);
 

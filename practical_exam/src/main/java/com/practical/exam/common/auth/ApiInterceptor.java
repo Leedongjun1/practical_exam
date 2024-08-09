@@ -65,6 +65,7 @@ public class ApiInterceptor implements HandlerInterceptor {
             			response.sendRedirect("/");
             			return false;
             		}
+            		LOGGER.info("USER_NO => "+ user.getUserNo());
             		LOGGER.info("User_ID => "+ user.getUserId());
             	} else {  
         			LOGGER.info("Session Expired...");

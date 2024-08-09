@@ -4,6 +4,7 @@
 
 <mapper namespace="com.practical.exam.cms.login.dao.LoginDao">
 	<resultMap id="getUserInfoReslt" type="Map">
+	  <result column="USER_NO" 		property="userNo" 	javaType="String"/>
 	  <result column="USER_ID" 		property="userId" 	javaType="String"/>
 	  <result column="USER_PW"		property="userPw" 	javaType="String"/>
 	  <result column="USER_SALT"	property="salt" 	javaType="String"/>
@@ -11,7 +12,8 @@
 	  <result column="USER_PHONE"	property="phone" 	javaType="String"/>
 	</resultMap>
     <select id="getUserInfo" resultMap="getUserInfoReslt">
-        SELECT USER_ID
+        SELECT USER_NO
+        	 , USER_ID
         	 , USER_PW
         	 , USER_SALT
         	 , USER_NAME
