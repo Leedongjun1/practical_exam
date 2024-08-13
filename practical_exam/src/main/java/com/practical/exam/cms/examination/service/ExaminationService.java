@@ -3,20 +3,27 @@ package com.practical.exam.cms.examination.service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.practical.exam.cms.common.service.RedisService;
 import com.practical.exam.cms.examination.dao.ExaminationDao;
 import com.practical.exam.common.auth.UserInfo;
 
 @Service("examinationService")
 public class ExaminationService {
+	
+	@Autowired
+	private RedisService redisService;
 
 	@Resource
 	UserInfo userInfo;
@@ -143,6 +150,13 @@ public class ExaminationService {
 		System.out.println("최종 문제목록1"+result.toString());
 		// q_no 기준으로 오름차순 정렬
 		result.sort(Comparator.comparing(map -> (Integer) map.get("qNo")));
+		
+		List<Map<String, Object>> selfMarkExamList = result.stream().filter(e -> (boolean)e.get("selfMarkingYn")).toList();
+		System.out.println("셀프마킹 문제목록1"+selfMarkExamList.toString());
+		redisService.setValue("SML" +"-"+userInfo.getUserNo() +"-"+ testNum, selfMarkExamList);
+		
+		System.out.println("레디스에 들어가있니? " + redisService.getValue("SML"+"-"+userInfo.getUserNo()+"-"+ testNum));
+		
 		System.out.println("최종 문제목록2"+result.toString());
 		return result;
 	}
@@ -164,7 +178,40 @@ public class ExaminationService {
 		System.out.println("뭐가 오긴오나? " + reqData.toString());
 		// 유저가 입력한 답 DB에 입력
 		int testNum = Integer.parseInt((String)reqData.get("testNum"));
+		List<Map<String, Object>> redisExamList = (List)redisService.getValue("SML"+"-"+userInfo.getUserNo()+"-"+testNum);
+		System.out.println("나올려나..? => ? " + redisExamList.toString());
 		
+		if(redisExamList != null) {
+			for(Map<String, Object> map : redisExamList	) {
+				String qNo = String.valueOf(map.get("qNo"));
+				int seqNo = (Integer)map.get("qSeq");
+				Map<String, Object> answers = examinationDao.getAnswer(seqNo).entrySet()
+						.stream()
+						.sorted(Map.Entry.comparingByKey())
+						.collect(Collectors.toMap(
+						        Map.Entry::getKey,
+						        Map.Entry::getValue,
+						        (oldValue, newValue) -> oldValue,  // 중복 키 처리 (없으면 기본 값 유지)
+						        LinkedHashMap::new  // 순서가 유지되는 LinkedHashMap에 수집
+						    ));
+				
+				
+
+				map.put("answers", answers);
+				System.out.println("금학두기" + answers.toString());
+				List<Map<String, Object>> markList = (List<Map<String, Object>>)reqData.get("markData");
+				System.out.println("금두꺼비111" + markList.toString());
+				Optional<Object> answer = markList.stream().filter(q -> q.get("questionNo").toString().equals(qNo))
+						.map(q -> q.get("answer"))
+						.findFirst();
+				if(answer.isPresent()) {
+					map.put("userAnswers", answer.get());
+				} else {
+					map.put("userAnswers", new ArrayList<>());
+				}
+			}
+		}
+		System.out.println("잘 됐으려나?" + redisExamList.toString());
 		// 유저가 입력한 정답
 		List<HashMap<String,Object>> markData = (List<HashMap<String,Object>>)reqData.get("markData");
 		reqData.put("userNo", userInfo.getUserNo());

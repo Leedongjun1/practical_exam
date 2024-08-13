@@ -66,14 +66,15 @@
 	</update>
 
 	<resultMap id="getExaminationResult" type="Map">
-		<result column="TEST_NUMBER" 			property="testNum" 		javaType="int" />
-		<result column="QUESTION_NO"			property="qNo" 			javaType="int" />
-		<result column="QUESTION_SEQ" 			property="qSeq" 		javaType="int" />
-		<result column="QUESTION_TITLE" 		property="qTitle" 		javaType="String" />
-		<result column="QUESTION_CONTENT" 		property="qContent" 	javaType="String" />
-		<result column="QUESTION_TYPE" 			property="qType" 		javaType="String" />
-		<result column="QUESTION_ANSWER_TYPE"	property="qAnsType" 	javaType="String" />
-		<result column="IMAGE_URL" 				property="imgUrl" 		javaType="String" />
+		<result column="TEST_NUMBER" 			property="testNum" 		 javaType="int" />
+		<result column="QUESTION_NO"			property="qNo" 			 javaType="int" />
+		<result column="QUESTION_SEQ" 			property="qSeq" 		 javaType="int" />
+		<result column="QUESTION_TITLE" 		property="qTitle" 		 javaType="String" />
+		<result column="QUESTION_CONTENT" 		property="qContent" 	 javaType="String" />
+		<result column="QUESTION_TYPE" 			property="qType" 		 javaType="String" />
+		<result column="QUESTION_ANSWER_TYPE"	property="qAnsType" 	 javaType="String" />
+		<result column="IMAGE_URL" 				property="imgUrl" 		 javaType="String" />
+		<result column="SELF_MARKING_YN"        property="selfMarkingYn" javaType="boolean" />
 	</resultMap>
 	<!-- 사용자의 현재 회차 시험문제 출력 -->
 	<select id="getExamination" parameterType="Map"
@@ -88,6 +89,9 @@
 			 , CASE WHEN INFO.QUESTION_CONTENT = 'Image'
 			  	 	THEN CONCAT('/practice_img/', INFO.EXAM_YEAR, '_', INFO.EXAM_CYCLE, '/', INFO.QUESTION_NO, '.PNG')
 		  	   ELSE NULL END AS IMAGE_URL
+	  	     , CASE WHEN INFO.SELF_MARKING_YN = 'Y'
+	  	     		THEN TRUE
+	  	       ELSE FALSE END AS SELF_MARKING_YN		
 		FROM P_QUESTION_TEST_HST HST, P_QUESTION_INFO INFO
 		WHERE HST.QUESTION_SEQ = INFO.SEQ
 		AND USER_NO = #{userNo}
@@ -127,6 +131,23 @@
 		WHERE USER_NO = #{userNo}
 		AND TEST_NUMBER= #{testNum}
 		AND ANSWER_YN ='Y'
+	</select>
+	
+	<resultMap id="answers" type="Map">
+		<result column="qNo" 					property="qno" 				javaType="int" />
+		<result column="qNo" 					property="qno" 				javaType="int" />
+		<result column="qNo" 					property="qno" 				javaType="int" />
+		<result column="qNo" 					property="qno" 				javaType="int" />
+		<result column="qNo" 					property="qno" 				javaType="int" />
+	</resultMap>
+	<select id='getAnswer' parameterType="int" resultType="Map">
+		SELECT QUESTION_ANSWER1 AS '1'
+			 , QUESTION_ANSWER2 AS '2'
+			 , QUESTION_ANSWER3 AS '3'
+ 			 , QUESTION_ANSWER4 AS '4'
+			 , QUESTION_ANSWER5 AS '5'
+		FROM P_QUESTION_INFO INFO
+		WHERE SEQ = #{seqNo}
 	</select>
 
 </mapper>

@@ -26,9 +26,6 @@ public interface ExaminationDao {
 	// 세션아이디와 마지막testCnt 비교해서 seq 가져오기
 	List<Map<String,Object>> getAnswerSeq(Map<String,Object> params);
 	
-	// seq 를 주고 문제 정답가져오기
-	String getAnswer(int seqs);
-	
 	// 유저가 입력한 답 DB에 입력
 	void updateUserInputAnswer(int testNum, int seq, String userAnswer);
 	
@@ -40,4 +37,7 @@ public interface ExaminationDao {
 	
 	//채점한 정보 점수 
 	int getMarkingScore(Map<String,Object> params);
+	
+	// seq 를 주고 문제 정답가져오기
+	Map<String, Object> getAnswer(int seqNo);
 }
