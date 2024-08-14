@@ -7,8 +7,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>모의 시험</title>
-<script defer type="text/javascript" src="/js/common/shamExam.js"></script>
+<title>자가 채점</title>
+
 
 <link href="/css/shamExamStyle.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="/js/common/ajax.js"></script>
@@ -25,8 +25,9 @@
 	}
 
 	function markingAnswer() {
-		console.log("ㅁ하ㅣ하하ㅏ하핳");
-		alert("[ㅁ하ㄴㅇㄴㅇㅣ하하ㅏ하핳");
+		console.log("체크포인트");
+		alert("금사마귀 " + JSON.stringify(${selfMarking.markData}));
+        console.log("금사마귀 " + JSON.stringify(${selfMarking.markData}));
 		let markingAnswer = new Array();
 
 		for (let i = 1; i <= 20; i++) {
@@ -79,15 +80,24 @@
 		}
 
 	}
+	
+
+    function test() {
+    	console.log("체크포인트");
+        console.log("금사마귀 " + JSON.stringify(${selfMarking.markData}));
+    }
+
+
 </script>
 
 </head>
 <body id="examinationBody">
 		<div class="swiper-container">
 			<div class="swiper-wrapper">
-				<c:forEach var="data" items="${examList}" varStatus="status">
+				
+				<c:forEach var="data" items="${selfMarking.markData}" varStatus="status">
 					<!-- 회차 -->
-					<input type="hidden" id="testNum-${data.qNo }"
+					<input type="hidden" id="testNum-${data.qNo}"
 						value="${data.testNum }">
 
 					<div class="swiper-slide">
@@ -151,7 +161,9 @@
 
 		<div class="copy">
 			<button class="submit" type="button" onclick="markingAnswer()">제출하기</button>
+			<button class="test" type="button" onclick="test()">테스트</button>
 		</div>
 
+	<script type="text/javascript" src="/js/common/selfMarking.js"></script>
 </body>
 </html>

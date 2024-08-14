@@ -63,9 +63,21 @@ public class ExaminationController {
 	 * @return
 	 */
 	@RequestMapping(value = "/marking", method = RequestMethod.POST)
-	public String marking(@RequestBody HashMap<String,Object> params,Model model) {
-		model.addAttribute("marking", examinationService.marking(params));
-		return "/examination/marking";
+	public ModelAndView marking(@RequestBody HashMap<String,Object> params) {
+		ModelAndView mav = new ModelAndView();
+		if(examinationService.marking(params).get("selfMark") != null) { 
+			System.out.println("셀프마킹 진입");
+			mav.setViewName("/examination/selfMarking");
+			mav.addObject("selfMarking", examinationService.marking(params));
+			return mav;
+		} else {
+			System.out.println("기본마킹 진입");
+			mav.setViewName("/examination/marking");
+			mav.addObject("marking", examinationService.marking(params));
+//			model.addAttribute("marking", examinationService.marking(params));
+			return mav;
+		}
+		
 	}
 	
 }

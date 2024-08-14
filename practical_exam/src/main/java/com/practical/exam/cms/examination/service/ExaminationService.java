@@ -182,6 +182,7 @@ public class ExaminationService {
 		System.out.println("나올려나..? => ? " + redisExamList.toString());
 		
 		if(redisExamList != null) {
+			HashMap<String,Object> result = new HashMap<String,Object>();
 			for(Map<String, Object> map : redisExamList	) {
 				String qNo = String.valueOf(map.get("qNo"));
 				int seqNo = (Integer)map.get("qSeq");
@@ -195,9 +196,10 @@ public class ExaminationService {
 						        LinkedHashMap::new  // 순서가 유지되는 LinkedHashMap에 수집
 						    ));
 				
-				
+				List<Object> answerList = new ArrayList<>(answers.values());
+				System.out.println("신기한대? " + answerList.toString());
 
-				map.put("answers", answers);
+				map.put("answers", answerList);
 				System.out.println("금학두기" + answers.toString());
 				List<Map<String, Object>> markList = (List<Map<String, Object>>)reqData.get("markData");
 				System.out.println("금두꺼비111" + markList.toString());
@@ -210,6 +212,11 @@ public class ExaminationService {
 					map.put("userAnswers", new ArrayList<>());
 				}
 			}
+			
+			result.put("markData", redisExamList);
+			result.put("selfMark", "Y");
+			System.out.println("최종 정리 .. => " + result.toString());
+			return result;
 		}
 		System.out.println("잘 됐으려나?" + redisExamList.toString());
 		// 유저가 입력한 정답
